@@ -1,0 +1,45 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Apartment {
+  id                 String   @id @default(cuid())
+  name               String
+  address            String
+  avitoUrl           String
+  realityCalendarUrl String
+  createdAt          DateTime @default(now())
+
+  competitors    Competitor[]
+  priceSnapshots PriceSnapshot[]
+}
+
+model Competitor {
+  id        String   @id @default(cuid())
+  name      String
+  url       String
+  createdAt DateTime @default(now())
+
+  apartment   Apartment @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  apartmentId String
+
+  priceSnapshots PriceSnapshot[]
+}
+
+model PriceSnapshot {
+  id         String   @id @default(cuid())
+  price      Int?
+  status     String
+  capturedAt DateTime @default(now())
+
+  apartment   Apartment? @relation(fields: [apartmentId], references: [id])
+  apartmentId String?
+
+  competitor   Competitor? @relation(fields: [competitorId], references: [id], onDelete: Cascade)
+  competitorId String?
+}
