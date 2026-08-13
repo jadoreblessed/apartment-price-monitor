@@ -1,0 +1,38 @@
+
+> apartment-price-monitor@0.1.0 monitor:all
+> node --import tsx scripts/run-monitoring.ts
+
+[12.08.2026, 14:00:01] Запуск мониторинга...
+Мониторинг завершился с ошибкой: PrismaClientKnownRequestError: 
+Invalid `prisma.priceSnapshot.findFirst()` invocation in
+C:\Users\user\apartment-price-monitor\src\lib\monitoring.ts:74:28
+
+  71 ];
+  72 const previous = await Promise.all(
+  73   targets.map((target) =>
+→ 74     prisma.priceSnapshot.findFirst(
+The column `main.PriceSnapshot.recordedBy` does not exist in the current database.
+    at ei.handleRequestError (C:\Users\user\apartment-price-monitor\node_modules\@prisma\client\src\runtime\RequestHandler.ts:228:13)
+    at ei.handleAndLogRequestError (C:\Users\user\apartment-price-monitor\node_modules\@prisma\client\src\runtime\RequestHandler.ts:174:12)
+    at ei.request (C:\Users\user\apartment-price-monitor\node_modules\@prisma\client\src\runtime\RequestHandler.ts:143:12)
+    at async a (C:\Users\user\apartment-price-monitor\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:833:24)
+    at async Promise.all (index 0)
+    at async runRealMonitoringForApartment (C:\Users\user\apartment-price-monitor\src\lib\monitoring.ts:72:20)
+    at async runAllRealMonitoring (C:\Users\user\apartment-price-monitor\src\lib\monitoring.ts:145:20)
+    at async main (C:\Users\user\apartment-price-monitor\scripts\run-monitoring.ts:9:18) {
+  code: 'P2022',
+  meta: {
+    modelName: 'PriceSnapshot',
+    column: 'main.PriceSnapshot.recordedBy'
+  },
+  clientVersion: '6.19.3'
+}
+^C
+> apartment-price-monitor@0.1.0 monitor:all
+> node --env-file=.env --import tsx scripts/run-monitoring.ts
+
+[13.08.2026, 14:00:02] Запуск мониторинга...
+Прокси включён: http://mobpool.proxy.market:10000
+Avito ограничил доступ. Общий запуск остановлен; обновите сессию командой npm run avito:session.
+Готово: квартир 1, проверено 2, успешно 0, проблем 2.
+^C

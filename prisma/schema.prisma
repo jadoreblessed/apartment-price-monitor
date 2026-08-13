@@ -7,16 +7,70 @@ generator client {
   provider = "prisma-client-js"
 }
 
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         String    @default("MANAGER")
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  sessions     Session[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
 model Apartment {
-  id                 String   @id @default(cuid())
+  id                 String    @id @default(cuid())
   name               String
   address            String
   avitoUrl           String
   realityCalendarUrl String
-  createdAt          DateTime @default(now())
+  monitoringDate     DateTime?
+  stayNights         Int       @default(1)
+  createdAt          DateTime  @default(now())
 
   competitors    Competitor[]
   priceSnapshots PriceSnapshot[]
+  monitoringRuns MonitoringRun[]
+  notifications  Notification[]
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  type      String
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  apartment   Apartment @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  apartmentId String
+}
+
+model MonitoringRun {
+  id           String   @id @default(cuid())
+  mode         String   @default("real")
+  status       String
+  checkedCount Int
+  successCount Int
+  blockedCount Int      @default(0)
+  failedCount  Int      @default(0)
+  startedAt    DateTime @default(now())
+  finishedAt   DateTime @default(now())
+
+  apartment   Apartment @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+  apartmentId String
 }
 
 model Competitor {
@@ -32,10 +86,14 @@ model Competitor {
 }
 
 model PriceSnapshot {
-  id         String   @id @default(cuid())
-  price      Int?
-  status     String
-  capturedAt DateTime @default(now())
+  id          String    @id @default(cuid())
+  price       Int?
+  status      String
+  capturedAt  DateTime  @default(now())
+  checkInDate DateTime?
+  nights      Int       @default(1)
+  totalPrice  Int?
+  recordedBy  String?
 
   apartment   Apartment? @relation(fields: [apartmentId], references: [id])
   apartmentId String?

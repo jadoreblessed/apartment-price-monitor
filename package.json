@@ -5,11 +5,22 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "postinstall": "prisma generate",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:backup": "node --import tsx scripts/backup-db.ts",
+    "backup:schedule": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/register-backup-task.ps1",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "monitor:all": "node --env-file=.env --import tsx scripts/run-monitoring.ts",
+    "avito:session": "node --env-file=.env --import tsx scripts/setup-avito-session.ts",
+    "cleanup:test-data": "node --import tsx scripts/cleanup-test-data.ts",
+    "competitor:add-new": "node --import tsx scripts/add-new-competitor.ts",
+    "schedule:install": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/register-monitoring-task.ps1"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",
+    "exceljs": "^4.4.0",
     "next": "16.3.0",
     "react": "19.2.8",
     "react-dom": "19.2.8"

@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Apartment Price Monitor
 
-## Getting Started
+Локальная система контроля цен квартир и конкурентов. Текущая версия не
+использует Neon, Vercel или автоматический обход Avito. База хранится в
+`prisma/dev.db`, а проверка цен выполняется в полуавтоматическом режиме.
 
-First, run the development server:
+## Что умеет
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- регистрация пользователей;
+- первый пользователь становится администратором;
+- остальные пользователи получают роль менеджера;
+- добавление квартир и конкурентов;
+- выбор даты заезда и количества ночей;
+- ручная проверка цены через обычный браузер;
+- ввод общей стоимости и автоматический расчёт цены за сутки;
+- история цен и уведомления об изменениях;
+- отметки проверок утром, днём и вечером;
+- экспорт отчёта в Excel;
+- скачивание и ежедневное резервное копирование SQLite-базы.
+
+## Установка
+
+Создайте `.env`:
+
+```env
+DATABASE_URL="file:./dev.db"
+AUTH_SECURE_COOKIE="0"
+PROXY_SERVER="http://mobpool.proxy.market:10000"
+PROXY_USERNAME="ваш_логин"
+PROXY_PASSWORD="ваш_пароль"
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Установите зависимости и создайте/обновите базу:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```powershell
+npm install
+npm run db:push
+npm run build
+npm run start
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Откройте http://localhost:3000 и зарегистрируйте первый аккаунт.
 
-## Learn More
+## Проверка цен
 
-To learn more about Next.js, take a look at the following resources:
+Откройте раздел `Начать проверку`. Для каждой квартиры:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Нажмите `Открыть объявление`.
+2. Посмотрите итоговую стоимость на Avito.
+3. Введите общую стоимость за выбранное количество ночей.
+4. Сохраните результат.
+5. После заполнения всех объявлений нажмите `Завершить проверку`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Система сохранит общую стоимость, рассчитает цену за сутки и обновит историю.
 
-## Deploy on Vercel
+## Отчёты и резервные копии
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Excel-отчёт доступен по кнопке `Экспорт Excel` на главной странице.
+В отчёт входят листы `Сводка`, `История цен` и `Проверки`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Администратор может скачать текущую копию базы кнопкой `Скачать backup`.
+Консольная копия:
+
+```powershell
+npm run db:backup
+```
+
+Ежедневная задача Windows на 23:30:
+
+```powershell
+npm run backup:schedule
+```
+
+Копии хранятся в папке `backups`. Последние 30 копий сохраняются автоматически.
+
+## Автоматический скрейпер
+
+Команды `npm run avito:session` и `npm run monitor:all` оставлены в проекте как
+экспериментальный режим, но основной рабочий сценарий теперь ручной. Это
+снижает риск блокировок Avito и делает проверку стабильнее для менеджеров.
+
+Если заданы три переменные `PROXY_*`, один прокси используется на протяжении
+всего запуска `monitor:all`. Следующий запуск создаёт новый браузерный контекст;
+смена внешнего IP определяется настройкой ротации у провайдера. Логин и пароль
+хранятся только в локальном `.env` и не должны добавляться в Git или архивы.
